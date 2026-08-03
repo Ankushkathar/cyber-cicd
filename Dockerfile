@@ -1,13 +1,9 @@
 FROM python:3.12-slim
 RUN useradd appuser
-
-USER appuser
-
 WORKDIR /app
-
 COPY requirements.txt .
-
-RUN pip install --no-cache-dir -r requirements.txt
+USER appuser
+RUN pip install  -r requirements.txt
 
 COPY . .
 
