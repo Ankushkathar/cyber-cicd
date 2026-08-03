@@ -1,0 +1,76 @@
+pipeline {
+
+    agent any
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                git 'https://github.com/Ankushkathar/cyber-cicd.git'
+            }
+        }
+
+        stage('Build Image') {
+            steps {
+                sh 'docker build -t security-demo:v1 .'
+            }
+        }
+
+       
+        stage('Deploy') {
+            steps {
+                sh 'docker run -d -p 5000:5000 security-demo:v1'
+            }
+        }
+    }
+}
+
+=======================================================
+pipeline {
+
+    agent any
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                git 'https://github.com/Ankushkathar/cyber-cicd.git'
+            }
+        }
+
+        stage('Build Image') {
+            steps {
+                sh 'docker build -t security-demo:v1 .'
+            }
+        }
+
+        stage('Security Gate') {
+            steps {
+                sh '''
+                trivy image \
+                --severity CRITICAL \
+                --exit-code 1 \
+                security-demo:v1
+                '''
+            }
+        }
+
+        stage('Generate SBOM') {
+            steps {
+                sh '''
+                trivy image \
+                --format cyclonedx \
+                -o sbom.json \
+                security-demo:v1
+                '''
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                sh 'docker run -d -p 5000:5000 security-demo:v1'
+            }
+        }
+    }
+}
+====================================================
